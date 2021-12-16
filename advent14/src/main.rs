@@ -2,41 +2,18 @@ use std::{
     collections::HashMap,
     fs::File,
     io::{BufRead, BufReader},
-    ops::Deref,
-    sync::Arc,
-    thread,
 };
-
-use parking_lot::{Mutex, RwLock};
 
 const INPUT: &str = "input.txt";
 const STEPS: u32 = 40;
 fn main() {
     let (template, rules) = read_input();
-    let quantities = count_quantities(&template);
-    let reference_quantity = Arc::new(Mutex::new(quantities));
-    let reference_rules = Arc::new(RwLock::new(rules));
-    let mut handles = Vec::new();
-    for i in 0..template.len() - 1 {
-        let quant_clone = reference_quantity.clone();
-        let rules_clone = reference_rules.clone();
-        let input = vec![template[i], template[i + 1]];
-        let handle = thread::spawn(move || {
-            two_chars(quant_clone, input, rules_clone, 1);
-        });
-
-        handles.push(handle);
-    }
-
-    for i in handles {
-        i.join().unwrap();
-    }
-
-    let new_quantities = reference_quantity.lock().deref().clone();
-    let (most_common, least_common) = find_highest_and_lowest(&new_quantities);
+    let mut quantities: HashMap<char, u64> = HashMap::new();
+    let new_map = reworked_algorithm(template, &rules, &mut &mut quantities);
+    let (most_common, least_common) = find_highest_and_lowest(&quantities);
     let quantity = most_common - least_common;
 
-    println!("{:?}", new_quantities);
+    println!("{:?}", quantities);
 
     println!(
         "The quantites are {} + {} = {}",
@@ -44,35 +21,112 @@ fn main() {
     );
 }
 
-fn two_chars(
-    counts: Arc<Mutex<HashMap<char, u64>>>,
-    input: Vec<char>,
-    rules: Arc<RwLock<HashMap<String, char>>>,
-    steps: u32,
+fn reworked_algorithm(
+    template: Vec<char>,
+    rules: &HashMap<String, char>,
+    quantities: &mut HashMap<char, u64>,
+) -> HashMap<String, u64> {
+    let mut pairs: HashMap<String, u64> = HashMap::new();
+    for i in rules.keys() {
+        pairs.insert(i.clone(), 0);
+    }
+    let new_rules = rework_rules(rules);
+
+    for i in 0..template.len() - 1 {
+        if let Some(value) = quantities.get(&template[i]).cloned() {
+            quantities.insert(template[i].clone(), value + 1);
+        } else {
+            quantities.insert(template[i].clone(), 1);
+        }
+        let mut new_string = template[i].to_string();
+        new_string += &template[i + 1].to_string();
+        if let Some(pair) = pairs.get(&new_string).cloned() {
+            pairs.insert(new_string, pair + 1);
+        }
+    }
+
+    if let Some(value) = quantities.get(&template.last().unwrap()).cloned() {
+        quantities.insert(template.last().unwrap().clone(), value + 1);
+    } else {
+        quantities.insert(template.last().unwrap().clone(), 1);
+    }
+
+    for _ in 0..STEPS {
+        one_step(&new_rules, rules, &mut pairs, quantities);
+    }
+
+    pairs
+}
+
+fn one_step(
+    new_rules: &HashMap<String, Vec<String>>,
+    old_rules: &HashMap<String, char>,
+    pairs: &mut HashMap<String, u64>,
+    quantities: &mut HashMap<char, u64>,
 ) {
-    if let Some(result) = rules.read().get(&input.iter().collect::<String>()) {
-        insert_count(counts.clone(), result);
-        if steps < STEPS {
-            two_chars(
-                counts.clone(),
-                vec![input[0], *result],
-                rules.clone(),
-                steps + 1,
-            );
-            two_chars(
-                counts.clone(),
-                vec![*result, input[1]],
-                rules.clone(),
-                steps + 1,
-            );
+    let mut new_pairs: HashMap<String, u64> = HashMap::new();
+    let mut remove_pairs: HashMap<String, u64> = HashMap::new();
+    for (pair, count) in pairs.iter() {
+        if *count > 0 {
+            let symbol = old_rules.get(pair).unwrap();
+            if let Some(value) = quantities.get(symbol).cloned() {
+                quantities.insert(symbol.clone(), value + count);
+            } else {
+                quantities.insert(symbol.clone(), *count);
+            }
+
+            if let Some(value) = remove_pairs.get(pair).cloned() {
+                remove_pairs.insert(pair.clone(), value + count);
+            } else {
+                remove_pairs.insert(pair.clone(), *count);
+            }
+
+            let new = new_rules.get(pair).unwrap();
+
+            for i in new {
+                if let Some(value) = new_pairs.get(i).cloned() {
+                    new_pairs.insert(i.clone(), value + count);
+                } else {
+                    new_pairs.insert(i.clone(), *count);
+                }
+            }
+        }
+    }
+
+    for (pair, count) in new_pairs {
+        if let Some(value) = pairs.get(&pair).cloned() {
+            pairs.insert(pair.clone(), value + count);
+        }
+    }
+
+    for (pair, count) in remove_pairs {
+        if let Some(value) = pairs.get(&pair).cloned() {
+            pairs.insert(pair.clone(), value - count);
         }
     }
 }
 
-fn insert_count(counts: Arc<Mutex<HashMap<char, u64>>>, result: &char) {
-    let mut guard = counts.lock();
-    let value = *guard.get(result).or_else(|| Some(&0)).unwrap();
-    guard.insert(*result, value + 1);
+fn rework_rules(rules: &HashMap<String, char>) -> HashMap<String, Vec<String>> {
+    let mut new_rules = HashMap::new();
+
+    for (pair, c) in rules {
+        let mut new_pairs: Vec<String> = Vec::new();
+        let chars = pair.chars().collect::<Vec<char>>();
+        let mut new_string = "".to_string();
+        new_string += &chars[0].to_string();
+        new_string += &c.to_string();
+
+        new_pairs.push(new_string);
+
+        new_string = "".to_string();
+
+        new_string += &c.to_string();
+        new_string += &chars[1].to_string();
+        new_pairs.push(new_string);
+        new_rules.insert(pair.clone(), new_pairs);
+    }
+
+    new_rules
 }
 
 fn find_highest_and_lowest(quantities: &HashMap<char, u64>) -> (u64, u64) {
@@ -89,19 +143,6 @@ fn find_highest_and_lowest(quantities: &HashMap<char, u64>) -> (u64, u64) {
     }
 
     (most_common, least_common)
-}
-
-fn count_quantities(template: &Vec<char>) -> HashMap<char, u64> {
-    let mut quantities: HashMap<char, u64> = HashMap::new();
-    for i in template {
-        if let Some(value) = quantities.get(&i).map(|f| *f) {
-            quantities.insert(i.clone(), value + 1);
-        } else {
-            quantities.insert(i.clone(), 1);
-        }
-    }
-
-    quantities
 }
 
 fn read_input() -> (Vec<char>, HashMap<String, char>) {
