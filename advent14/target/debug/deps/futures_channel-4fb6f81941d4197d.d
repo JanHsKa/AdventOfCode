@@ -1,0 +1,10 @@
+c:\Users\jancm\Programme und Sonstiges\RustWorkspace\AdventOfCode\advent14\target\debug\deps\futures_channel-4fb6f81941d4197d.rmeta: C:\Users\jancm\.cargo\registry\src\github.com-1ecc6299db9ec823\futures-channel-0.3.18\src\lib.rs C:\Users\jancm\.cargo\registry\src\github.com-1ecc6299db9ec823\futures-channel-0.3.18\src\lock.rs C:\Users\jancm\.cargo\registry\src\github.com-1ecc6299db9ec823\futures-channel-0.3.18\src\mpsc\mod.rs C:\Users\jancm\.cargo\registry\src\github.com-1ecc6299db9ec823\futures-channel-0.3.18\src\mpsc\queue.rs C:\Users\jancm\.cargo\registry\src\github.com-1ecc6299db9ec823\futures-channel-0.3.18\src\mpsc\sink_impl.rs C:\Users\jancm\.cargo\registry\src\github.com-1ecc6299db9ec823\futures-channel-0.3.18\src\oneshot.rs
+
+c:\Users\jancm\Programme und Sonstiges\RustWorkspace\AdventOfCode\advent14\target\debug\deps\futures_channel-4fb6f81941d4197d.d: C:\Users\jancm\.cargo\registry\src\github.com-1ecc6299db9ec823\futures-channel-0.3.18\src\lib.rs C:\Users\jancm\.cargo\registry\src\github.com-1ecc6299db9ec823\futures-channel-0.3.18\src\lock.rs C:\Users\jancm\.cargo\registry\src\github.com-1ecc6299db9ec823\futures-channel-0.3.18\src\mpsc\mod.rs C:\Users\jancm\.cargo\registry\src\github.com-1ecc6299db9ec823\futures-channel-0.3.18\src\mpsc\queue.rs C:\Users\jancm\.cargo\registry\src\github.com-1ecc6299db9ec823\futures-channel-0.3.18\src\mpsc\sink_impl.rs C:\Users\jancm\.cargo\registry\src\github.com-1ecc6299db9ec823\futures-channel-0.3.18\src\oneshot.rs
+
+C:\Users\jancm\.cargo\registry\src\github.com-1ecc6299db9ec823\futures-channel-0.3.18\src\lib.rs:
+C:\Users\jancm\.cargo\registry\src\github.com-1ecc6299db9ec823\futures-channel-0.3.18\src\lock.rs:
+C:\Users\jancm\.cargo\registry\src\github.com-1ecc6299db9ec823\futures-channel-0.3.18\src\mpsc\mod.rs:
+C:\Users\jancm\.cargo\registry\src\github.com-1ecc6299db9ec823\futures-channel-0.3.18\src\mpsc\queue.rs:
+C:\Users\jancm\.cargo\registry\src\github.com-1ecc6299db9ec823\futures-channel-0.3.18\src\mpsc\sink_impl.rs:
+C:\Users\jancm\.cargo\registry\src\github.com-1ecc6299db9ec823\futures-channel-0.3.18\src\oneshot.rs:
